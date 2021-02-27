@@ -1,4 +1,5 @@
 use anyhow::Context as _;
+use ansi_term;
 
 const MISSING_CONFIG_HELP: &str =
     "Before using rbw, you must configure the email address you would like to \
@@ -27,7 +28,7 @@ impl DecryptedCipher {
         match &self.data {
             DecryptedData::Login { password, .. } => {
                 if let Some(password) = password {
-                    println!("{}", password);
+                    println!("{}", ansi_term::Colour::Blue.paint(password));
                     true
                 } else {
                     eprintln!("entry for '{}' had no password", desc);
@@ -530,7 +531,7 @@ pub fn list(fields: &[String]) -> anyhow::Result<()> {
                     .unwrap_or_else(|| "".to_string()),
             })
             .collect();
-        println!("{}", values.join("\t"));
+        println!("{}", ansi_term::Colour::Green.paint(values.join("\t")));
     }
 
     Ok(())
@@ -555,6 +556,7 @@ pub fn get(
 
     let (_, decrypted) = find_entry(&db, name, user, folder)
         .with_context(|| format!("couldn't find entry for '{}'", desc))?;
+    print!("{} -> ", ansi_term::Colour::Green.paint(name));
     if full {
         decrypted.display_long(&desc);
     } else {
